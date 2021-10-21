@@ -1,21 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {useState} from 'react';
+
+import RootStack from "./navigators/RootStack";
+
+import AppLoading from 'expo-app-loading'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {CredentialsContext} from './components/CredentialsContext'
+import MainTabScreen from "./screens/NewNavScreen/MainTabScreen.js";
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [appReady, setAppReady] = useState(false)
+  const [storedCredentials, setStoredCredentials] = useState('')
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  const checkLoginCredentials = () => {
+    AsyncStorage
+        .getItem('nevskiyCredentials')
+        .then((result) => {
+          if (result !== null) {
+            setStoredCredentials(JSON.parse(result))
+          } else {
+            setStoredCredentials(null)
+          }
+        })
+        .catch(error => console.log(error))
+  }
+
+  if (!appReady) {
+    return (
+      <AppLoading
+        startAsync={checkLoginCredentials}
+        onFinish={() => setAppReady(true)}
+        onError={console.warn}
+      />
+    )
+  }
+
+  return (
+    <CredentialsContext.Provider value={{storedCredentials, setStoredCredentials}}>
+      <RootStack />
+    </CredentialsContext.Provider>
+    // <MainTabScreen />
+  )
+}
