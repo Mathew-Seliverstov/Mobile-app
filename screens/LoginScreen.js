@@ -73,6 +73,7 @@ const LoginScreen = ({navigation}) => {
             .then(() => {
                 handleMessage(message, status)
                 setStoredCredentials(credentials)
+                navigation.navigate('Main')
             })
             .catch(error => {
                 console.log(error)

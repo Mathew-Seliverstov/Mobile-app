@@ -24,14 +24,14 @@ import {
   ExtraText,
   TextLink,
   TextLinkContent,
-} from '../components/styles';
+} from '../../components/styles';
 // KeyboardAvoidingWrapper
-import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
+import KeyboardAvoidingWrapper from '../../components/KeyboardAvoidingWrapper';
 // PersistLogin
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CredentialsContext } from '../components/CredentialsContext';
+import { CredentialsContext } from '../../components/CredentialsContext';
 
-const SignupScreen = ({ navigation }) => {
+const EditProfileScreen = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
@@ -40,18 +40,33 @@ const SignupScreen = ({ navigation }) => {
 
   const handleSignup = async (credentials, { setSubmitting }) => {
     handleMessage(null);
-    const url = 'https://mighty-chamber-57023.herokuapp.com/user/signup';
+    const url = 'https://mighty-chamber-57023.herokuapp.com/user/edit';
 
     await axios
-      .post(url, credentials)
+      .post(url, { ...credentials, _id: storedCredentials._id })
       .then((response) => {
         const result = response.data;
-        const { status, message, data } = result;
+        const { status, message } = result;
 
         if (status !== 'SUCCESS') {
           handleMessage(message, status);
         } else {
-          persistLogin({ ...data }, message, status);
+          const newData = {
+            ...storedCredentials,
+          };
+          newData.name = credentials.name;
+          newData.phone = credentials.phone;
+
+          AsyncStorage.setItem('nevskiyCredentials', JSON.stringify(newData))
+            .then(async () => {
+              handleMessage(message, status);
+              setStoredCredentials(newData);
+              navigation.navigate('Profile');
+            })
+            .catch((error) => {
+              handleMessage('Не удалось обновить данные!');
+              console.log(error);
+            });
         }
         setSubmitting(false);
       })
@@ -67,39 +82,19 @@ const SignupScreen = ({ navigation }) => {
     setMessageType(type);
   };
 
-  const persistLogin = (credentials, message, status) => {
-    AsyncStorage.setItem('nevskiyCredentials', JSON.stringify(credentials))
-      .then(() => {
-        handleMessage(message, status);
-        setStoredCredentials(credentials);
-      })
-      .catch((error) => {
-        handleMessage('Не удалось сохранить вход в систему!');
-        console.log(error);
-      });
-  };
-
   return (
     <KeyboardAvoidingWrapper>
       <StyledContainer>
-        <StatusBar style="dark" backgroundColor={'#ffffff70'} />
         <InnerContainer>
-          <SubTitle>Регистрация</SubTitle>
-
           <Formik
-            initialValues={{ name: '', phone: '', email: '', password: '', confirmPassword: '' }}
+            initialValues={{
+              name: storedCredentials.name,
+              phone: storedCredentials.phone,
+              password: '',
+            }}
             onSubmit={(values, { setSubmitting }) => {
-              if (
-                values.email == '' ||
-                values.password == '' ||
-                values.fullName == '' ||
-                values.phone == '' ||
-                values.confirmPassword == ''
-              ) {
+              if (values.password == '' || values.fullName == '' || values.phone == '') {
                 handleMessage('Пожалуйста, заполните все поля!');
-                setSubmitting(false);
-              } else if (values.password !== values.confirmPassword) {
-                handleMessage('Пароли не совпадают!');
                 setSubmitting(false);
               } else {
                 handleSignup(values, { setSubmitting });
@@ -126,16 +121,7 @@ const SignupScreen = ({ navigation }) => {
                   onBlur={handleBlur('phone')}
                   value={values.phone}
                 />
-                <MyTextInput
-                  label="Email"
-                  icon={<Octicons name="lock" size={30} color={Colors.brand} />}
-                  placeholder="andrei@gmail.com"
-                  placeholderTextColor={Colors.darkLight}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  value={values.email}
-                  keyboardType="email-address"
-                />
+                <Line />
                 <MyTextInput
                   label="Пароль"
                   icon={<Octicons name="lock" size={30} color={Colors.brand} />}
@@ -149,23 +135,10 @@ const SignupScreen = ({ navigation }) => {
                   hidePassword={hidePassword}
                   setHidePassword={setHidePassword}
                 />
-                <MyTextInput
-                  label="Подтвердите пароль"
-                  icon={<Octicons name="lock" size={30} color={Colors.brand} />}
-                  placeholder="*********"
-                  placeholderTextColor={Colors.darkLight}
-                  onChangeText={handleChange('confirmPassword')}
-                  onBlur={handleBlur('confirmPassword')}
-                  value={values.confirmPassword}
-                  secureTextEntry={hidePassword}
-                  isPassword={true}
-                  hidePassword={hidePassword}
-                  setHidePassword={setHidePassword}
-                />
                 <MsgBox type={messageType}>{message}</MsgBox>
                 {!isSubmitting && (
                   <StyledButton onPress={handleSubmit}>
-                    <ButtonText>Зарегистрироваться</ButtonText>
+                    <ButtonText>Сохранить изменения</ButtonText>
                   </StyledButton>
                 )}
 
@@ -174,14 +147,6 @@ const SignupScreen = ({ navigation }) => {
                     <ActivityIndicator size={25} color={'#ffffff'} />
                   </StyledButton>
                 )}
-
-                <Line />
-                <ExtraView>
-                  <ExtraText>Уже есть аккаунт? </ExtraText>
-                  <TextLink onPress={() => navigation.navigate('LoginScreen')}>
-                    <TextLinkContent>Войти</TextLinkContent>
-                  </TextLink>
-                </ExtraView>
               </StyledFromArea>
             )}
           </Formik>
@@ -211,4 +176,4 @@ const MyTextInput = ({ label, icon, isPassword, hidePassword, setHidePassword, i
   );
 };
 
-export default SignupScreen;
+export default EditProfileScreen;

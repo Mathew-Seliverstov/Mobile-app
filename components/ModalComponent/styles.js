@@ -5,11 +5,11 @@ import { Colors } from "../styles";
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
-export const Container = styled.TouchableOpacity`
+export const Container = styled.View`
   flex: 1;
   align-items: center;
   justify-content: center;
-  background: #0f0f0f50;
+  background: #0f0f0f70;
   padding: 25px;
 `
 

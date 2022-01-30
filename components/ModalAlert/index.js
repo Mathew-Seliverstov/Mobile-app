@@ -9,12 +9,41 @@ import {
     Title,
     BtnBlock,
     ConfirmBtn,
+    BtnDeleteBlock,
+    ConfirmDeleteBtn,
     BtnText
 } from "./styles";
 import {Colors} from '../styles';
 
 
 const ModalAlert = (props) => {
+  if (props.cancelBtn) {
+    return (
+        <Modal
+            transparent={true}
+            animationType="fade"
+            visible={props.showModal}
+            onRequestClose={() => props.changeVisibility(false)}
+        >
+            <Container onPress={() => props.changeVisibility(false)}>
+                <StyledModal>
+                    <Header color={props.style}>{props.header}</Header>
+                    <TextBlock>
+                      <Title>{props.text}</Title>
+                    </TextBlock>
+                    <BtnDeleteBlock>
+                      <ConfirmDeleteBtn color={Colors.error} onPress={() => props.changeVisibility(false)}>
+                        <BtnText>Отмена</BtnText>
+                      </ConfirmDeleteBtn>
+                      <ConfirmDeleteBtn color={props.style} onPress={() => props.changeVisibility(false)}>
+                        <BtnText>ОК</BtnText>
+                      </ConfirmDeleteBtn>
+                    </BtnDeleteBlock>
+                </StyledModal>
+            </Container>
+        </Modal>
+    )
+  } else {
     return (
         <Modal
             transparent={true}
@@ -37,6 +66,7 @@ const ModalAlert = (props) => {
             </Container>
         </Modal>
     )
+  }
 }
 
 export default  ModalAlert
