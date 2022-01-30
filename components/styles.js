@@ -58,7 +58,7 @@ export const PageLogoWrapper = styled.TouchableOpacity`
 export const PageTitle = styled.Text`
   font-size: 30px;
   text-align: center;
-  font-weight: bold;
+  font-family: rbt-bold;
   color: ${brand};
   padding: 10px;
   
@@ -72,7 +72,7 @@ export const SubTitle = styled.Text`
   margin-bottom: 20px;
   margin-top: 20px;
   letter-spacing: 1px;
-  font-weight: bold;
+  font-family: rbt-bold;
   color: ${tertiary};
 
   ${(props) => props.welcome  && `
@@ -136,8 +136,8 @@ export const StyledButton = styled.TouchableOpacity`
 
 export const ButtonText = styled.Text`
   color: ${primary};
-  font-size: 16px;
-
+  font-size: 18px;
+  font-family: rbt-medium;
   ${(props) => props.google === true && `
     padding: 25px;
   `}
@@ -146,7 +146,7 @@ export const ButtonText = styled.Text`
 export const MsgBox = styled.Text`
   text-align: center;
   font-size: 15px;
-  font-weight: 600;
+  font-family: rbt-medium;
   
   color: ${(props) => props.type === 'SUCCESS' ? green : red}
 `

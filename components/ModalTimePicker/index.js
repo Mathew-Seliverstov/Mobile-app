@@ -29,7 +29,13 @@ const ModalTimePicker = (props) => {
     >
       <Container>
         <StyledModal>
-          {props.isLoading && <ActivityIndicator size={36} color="#0f0f0f" />}
+          {props.isLoading && <>
+              <CloseButton onPress={() => props.changeModalVisibility(false)}>
+                <CloseIcon source={require('../../assets/img/closeModal.png')}/>
+              </CloseButton>
+            <ActivityIndicator style={{margin: 20}} size={36 || 'large'} color="#0f0f0f" />
+            </>
+          }
           {!props.isLoading && <>
             <Header>
               <Title>Выберите время:</Title>

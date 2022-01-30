@@ -8,7 +8,7 @@ export const Container = styled.TouchableOpacity`
   flex: 1;
   align-items: center;
   justify-content: center;
-  background: #00000050;
+  background: #0f0f0f70;
   padding: 25px;
 `
 
@@ -63,4 +63,21 @@ export const BtnText = styled.Text`
   font-size: 20px;
   font-weight: bold;
   color: #fff;
+`
+
+export const BtnDeleteBlock = styled.View`
+  padding: 15px;
+  margin-top: 30px;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+`
+
+export const ConfirmDeleteBtn = styled.TouchableOpacity`
+  width: 45%;
+  height: 50px;
+  background-color: ${props => props.color};
+  border-radius: 25px;
+  align-items: center;
+  justify-content: center;
 `

@@ -15,7 +15,7 @@ export const Container = styled.View`
 export const Header = styled.Text`
 	color: #0f0f0f;
 	font-size: 22px;
-	font-weight: bold;
+	font-family: rbt-bold;
 	margin-bottom: 5px;
 `
 
@@ -28,6 +28,25 @@ export const ItemWrap = styled.TouchableOpacity`
 	align-items: center;
 	border-radius: 10px;
 	background-color: ${props => props.bg || '#fff'};
+`
+
+export const PriceWrap = styled.View`
+	z-index: 3;
+	height: 30px;
+	width: auto;
+	border-radius: 15px;
+	background-color: ${Colors.success};
+	padding: 10px;
+	justify-content: center;
+	align-items: center;
+	margin-top: 10px;
+	margin-left: 55%;
+`
+
+export const PriceTitle = styled.Text`
+	font-size: 18px;
+	font-family: rbt-bold;
+	color: #fff;
 `
 
 export const StyledImage = styled.Image`
@@ -47,7 +66,7 @@ export const TextContainer = styled.View`
 
 export const ItemText = styled.Text`
 	font-size: 14.2px;
-	font-weight: bold;
+	font-family: rbt-medium;
 	color: ${props => props.color || '#0f0f0f'};
 `
 
@@ -66,7 +85,7 @@ export const SelectItemWrap = styled.TouchableOpacity`
 
 export const SelectItemText = styled.Text`
 	font-size: 18px;
-	font-weight: bold;
+	font-family: rbt-medium;
 `
 
 export const SelectItemIcon = styled.Image`
@@ -89,6 +108,6 @@ export const ButtonWrap = styled.TouchableOpacity`
 
 export const ButtonText = styled.Text`
 	font-size: 22px;
-	font-weight: bold;
+	font-family: rbt-bold;
 	color: #fff;
 `

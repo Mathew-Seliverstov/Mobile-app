@@ -12,7 +12,7 @@ const PickerComponent = (props) => {
 
 	return (
 		<Container style={styles.shadow}>
-			<Label>Снаряжение</Label>
+			<Label>{props.label}</Label>
 			<Picker
 				enabled={true}
 				selectedValue={text}

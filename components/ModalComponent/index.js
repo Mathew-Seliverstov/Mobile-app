@@ -11,13 +11,15 @@ import {
 } from './styles'
 import PickerComponent from '../PickerComponent'
 
-const ModalComponent = ({ visible, setVisible, setEquipment, setGroup, showEquipment, showGroup, data, cancel, setSelectedItem, equipmentValue, groupValue }) => {
+const ModalComponent = ({ visible, setVisible, setEquipmentValue, setTrainingType, showEquipment, isIndividual, data, cancel, setSelectedItem, equipmentValue, trainingType, setDate, setTime, onlyIndividual, setTrainingId }) => {
   const onConfirm = () => {
     if (equipmentValue === '') {
-      setEquipment('не требуется, есть свое')
+      setEquipmentValue('не требуется, есть свое')
     } 
-    if (groupValue === '') {
-      setGroup('групповая')
+    if (trainingType === '' && !onlyIndividual) {
+      setTrainingType('групповая')
+    } else if (onlyIndividual) {
+      setTrainingType('индивидуальная')
     }
     setVisible(false)
   }
@@ -25,8 +27,9 @@ const ModalComponent = ({ visible, setVisible, setEquipment, setGroup, showEquip
   const onCancel = () => {
     setVisible(false)
     setSelectedItem('')
-    setGroup('')
-    setEquipment('')
+		setTrainingId('')
+    setTrainingType('')
+    setEquipmentValue('')
     const newData = data.map(el => {
       return {
         ...el,
@@ -34,6 +37,8 @@ const ModalComponent = ({ visible, setVisible, setEquipment, setGroup, showEquip
       }
     })
     cancel(newData)
+    setDate('Выберите дату')
+    setTime('Выберите время')
   }
 
   return (
@@ -43,18 +48,19 @@ const ModalComponent = ({ visible, setVisible, setEquipment, setGroup, showEquip
       visible={visible}
       onRequestClose={() => setVisible(false)}
     >
-      <Container activeOpacity={1} onPress={() => setVisible(false)}>
+      <Container>
         <StyledModal>
-          <Header>info</Header>
           {showEquipment && (
             <PickerComponent 
-              setValue={setEquipment}
+              setValue={setEquipmentValue}
+              label="Снаряжение"
               options={[{name: 'не требуется, есть свое', id: 1}, {name: 'с арендой снаряжения', id: 2}]}
             />
           )}
-          {!showGroup && (
+          {isIndividual && (
             <PickerComponent 
-              setValue={setGroup}
+              setValue={setTrainingType}
+              label="Тип"
               options={[{name: 'групповая', id: 1}, {name: 'индивидуальная', id: 2}]}
             />
           )}

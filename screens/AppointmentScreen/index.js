@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import {
 	Container,
 	Header,
 	ItemWrap,
+	PriceWrap,
+	PriceTitle,
 	StyledImage,
 	TextContainer,
 	ItemText,
-	Label,
 	SelectItemWrap,
 	SelectItemText,
 	SelectItemIcon,
@@ -21,41 +22,63 @@ import {Colors} from '../../components/styles'
 import axios from 'axios'
 
 import ModalComponent from '../../components/ModalComponent'
+import FinalModal from '../../components/FinalModal'
+import {CredentialsContext} from '../../components/CredentialsContext'
 
 const AppointmentScreen = () => {
+	// User Credentials
+	const {storedCredentials, setStoredCredentials} = useContext(CredentialsContext)
 	const [isLoading, setIsLoading] = useState(true)
 	// Select training
 	const [data, setData] = useState([])
 	const [selectedItem, setSelectedItem] = useState('')
 	const [trainingId, setTrainingId] = useState('')
+	const [onlyIndividual, setOnlyIndividual] = useState(false)
+	const [price, setPrice] = useState('')
+	const [individualPrice, setIndividualPrice] = useState('')
 	const [visible, setVisible] = useState(false)
 	const [equipment, setEquipment] = useState(false)
-	const [group, setGroup] = useState(true)
+	const [isIndividual, setIsIndividual] = useState(false)
 	const [equipmentValue, setEquipmentValue] = useState('')
-	const [groupValue, setGroupValue] = useState('')
+	const [trainingType, setTrainingType] = useState('')
 
 	const onClickItem = (item) => {
 		setSelectedItem(item.title)
 		setTrainingId(item.id)
+		setPrice(item.price)
+		setIndividualPrice(item.individualPrice)
+		setOnlyIndividual(item.onlyIndividual)
 		const newData = data.map(el => {
 			if (item.id === el.id) {
 				if (el.selected) {
 					setSelectedItem('')
 					setTrainingId('')
 					setEquipmentValue('')
-					setGroupValue('')
+					setTrainingType('')
 					setDate('Выберите дату')
 					setTime('Выберите время')
-				} else if (el.equipment && el.group) {
-					setVisible(true)
-					setEquipment(true)
-					setGroup(false)
-				} else if (el.equipment) {
-					setVisible(true)
-					setEquipment(true)
-				} else if (!el.group) {
-					setVisible(true)
-					setGroup(false)
+				} else {
+					setDate('Выберите дату')
+					setTime('Выберите время')
+					if (el.equipment && el.isIndividual) {
+						setEquipment(true)
+						setIsIndividual(true)
+						setVisible(true)
+					} else {
+						if (el.equipment) {
+							setEquipment(true)
+							setVisible(true)
+						} else if (el.isIndividual) {
+							setIsIndividual(true)
+							setVisible(true)
+						}
+					}
+					if (!el.equipment) {
+						setEquipment(false)
+					}
+					if (!el.isIndividual) {
+						setIsIndividual(false)
+					}
 				}
 				return {
 					...el,
@@ -71,7 +94,6 @@ const AppointmentScreen = () => {
 		// set_id
 	}
 	// Buttons values
-	// const [training, setTraining] = useState('')
 	const [date, setDate] = useState('Выберите дату')
 	// Choose time
 	const [time, setTime] = useState('Выберите время')
@@ -85,10 +107,13 @@ const AppointmentScreen = () => {
 	const [alertStyle, setAlertStyle] = useState(Colors.warn)
 	const onClickTime = () => {
 		if (date === 'Выберите дату') {
-			setShowAlert(true)
+			setAlertStyle(Colors.warn)
+			setAlertHeader('Предупреждение')
 			setAlertText('Выберите дату')
+			setShowAlert(true)
 		} else {
 			getTime()
+			setIsTimeLoading(true)
 			setShowModal(true)
 		}
 	}
@@ -121,6 +146,9 @@ const AppointmentScreen = () => {
         )
   }
 	// Create an appointment
+	const [showFinalModal, setShowFinalModal] = useState(false)
+	const [finalData, setFinalData] = useState({})
+
 	function finish() {
 		if (trainingId === '') {
 			setAlertStyle(Colors.warn)
@@ -138,45 +166,17 @@ const AppointmentScreen = () => {
 			setAlertText('Выберите время')
 			setShowAlert(true)
 		} else {
-			function nullify() {
-				setTraining('')
-				setDate('Выберите дату')
-				setDatePicker(new Date())
-				setTime('Выберите время')
-				const newData = data.map(el => {
-					return {
-						...el,
-						selected: false
-					}
-				})
-				setData(newData)
-			}
-			// axios...
-			axios
-				.put('https://mighty-chamber-57023.herokuapp.com/training/update', {
-					_id: trainingId,
-					date,
-					time
-				})
-				.then(res => {
-					if (res.data.status === 400) {
-						setAlertStyle(Colors.error)
-						setAlertText(res.data.message)
-						setAlertHeader('Ошибка')
-						setShowAlert(true)
-					} else if (res.data.status === 200) {
-						nullify()
-					}
-				})
-				.catch(err => console.log('Error: ', err))
-			
-			// console.log({
-			// 	training: selectedItem,
-			// 	date,
-			// 	time,
-			// 	inventory: equipmentValue,
-			// 	group: groupValue
-			// })
+			setFinalData({
+				training: selectedItem,
+				date,
+				time,
+				price,
+				inventory: equipmentValue,
+				isIndividual: trainingType,
+				onlyIndividual,
+				individualPrice
+			})
+			setShowFinalModal(true)
 		}
 	}
 
@@ -207,9 +207,14 @@ const AppointmentScreen = () => {
 			<ItemWrap
 				onPress={() => onClickItem(item)} 
 				bg={item.selected ? '#0f0f0f' : '#fff'}
-				style={styles.shadow}
+				style={[styles.shadow, {justifyContent: 'space-between'}]}
 			>
+				<PriceWrap>
+					<PriceTitle>{item.price}₽</PriceTitle>
+				</PriceWrap>
+				
 					<StyledImage 
+						style={{position: 'absolute'}}
 						source={{uri: item.url}}
 						rezieMode="contain"
 					/>
@@ -222,9 +227,9 @@ const AppointmentScreen = () => {
 
 	return (
 		<Container>
-			<StatusBar barStyle={showModal || showAlert || visible ? 'light-content' : 'dark-content'} backgroundColor={showModal || showAlert || visible ? '#00000050' : '#fff'}/>
+			<StatusBar barStyle={showModal || showAlert || visible || showFinalModal ? 'light-content' : 'dark-content'} backgroundColor={showModal || showAlert || visible || showFinalModal  ? '#0f0f0f70' : '#ffffff'}/>
 			<Header>Выберите тренировку</Header>
-			{isLoading && <ActivityIndicator size={64} color={'#0f0f0f'} />}
+			{isLoading && <ActivityIndicator style={{margin: 40}} size={64 || 'large'} color="#0f0f0f" />}
 			{!isLoading && <FlatList 
 					data={data}
 					renderItem={renderItem}
@@ -266,14 +271,18 @@ const AppointmentScreen = () => {
         setVisible={setVisible}
 				visible={visible}
 				showEquipment={equipment}
-				setEquipment={setEquipmentValue}
+				setEquipmentValue={setEquipmentValue}
 				equipmentValue={equipmentValue}
-				showGroup={group}
-				setGroup={setGroupValue}
-				groupValue={groupValue}
+				isIndividual={isIndividual}
+				onlyIndividual={onlyIndividual}
+				setTrainingType={setTrainingType}
+				trainingType={trainingType}
+				setTrainingId={setTrainingId}
 				data={data}
 				cancel={setData}
 				setSelectedItem={setSelectedItem}
+				setDate={setDate}
+				setTime={setTime}
       />
 			{/* Time Picker */}
 			<SelectItemWrap
@@ -305,8 +314,32 @@ const AppointmentScreen = () => {
 				onPress={() => finish()}
 				style={styles.itemShadow}
 			>
-				<ButtonText>записаться</ButtonText>
+				<ButtonText>Записаться</ButtonText>
 			</ButtonWrap>
+
+			{/* Final Modal */}
+			<FinalModal 
+				visible={showFinalModal}
+				setVisible={setShowFinalModal}
+				data={finalData}
+				itemData={data}
+				trainingId={trainingId}
+				date={date}
+				time={time}
+				setAlertStyle={setAlertStyle}
+				setAlertText={setAlertText}
+				setAlertHeader={setAlertHeader}
+				setShowAlert={setShowAlert}
+				selectedItem={selectedItem}
+				setTrainingType={setTrainingType}
+				setDate={setDate}
+				setDatePicker={setDatePicker}
+				setTime={setTime}
+				setData={setData}
+				trainingType={trainingType}
+				inventory={equipmentValue}
+				_id={storedCredentials.appointments}
+			/>
 		</Container>
 	)
 }
